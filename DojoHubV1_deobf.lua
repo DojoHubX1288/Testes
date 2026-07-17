@@ -1862,3 +1862,213 @@ spawn(function()
     end)
   end
 end)
+
+Tabs.Main:AddSection("Chest")
+
+ChestTW = Tabs.Main:AddToggle({
+Name = "Auto Farm Chest", 
+Description = "Tự động nhặt rương", 
+Default = false,
+Callback = function(Value)
+  _G.AutoFarmChest = Value
+end})
+spawn(function()
+  while wait(Sec) do
+    if _G.AutoFarmChest then
+      pcall(function()
+        local CollectionService = game:GetService("CollectionService")
+        local Players = game:GetService("Players")
+        local Player = Players.LocalPlayer
+        local Character = Player.Character or Player.CharacterAdded:Wait()                
+        if not Character then return end                
+        local Position = Character:GetPivot().Position
+        local Chests = CollectionService:GetTagged("_ChestTagged")      
+        local Distance, Nearest = math.huge, nil  
+        for i = 1, #Chests do
+          local Chest = Chests[i]
+          local Magnitude = (Chest:GetPivot().Position - Position).Magnitude        
+          if not SelectedIsland or Chest:IsDescendantOf(SelectedIsland) then
+            if not Chest:GetAttribute("IsDisabled") and Magnitude < Distance then
+              Distance = Magnitude
+              Nearest = Chest
+            end
+          end
+        end
+      if Nearest then _tp(Nearest:GetPivot()) end
+      end)
+    end
+  end
+end)
+
+ChestBP = Tabs.Main:AddToggle({
+    Name = "Auto Chest Bypass", 
+    Description = "Tự động nhặt rương bypass",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoChestBP = Value
+
+        if Value then
+            local LocalPlayer = game:GetService("Players").LocalPlayer
+            local IsFarming = false
+            local UncheckedChests = {}
+            local FirstRun = true
+
+            local function getCharacter()
+                if not LocalPlayer.Character then
+                    LocalPlayer.CharacterAdded:Wait()
+                end
+                LocalPlayer.Character:WaitForChild("HumanoidRootPart")
+                return LocalPlayer.Character
+            end
+
+            local function getChestsSorted()
+                if FirstRun then
+                    FirstRun = false
+                    for _, Object in pairs(game:GetDescendants()) do
+                        if Object.Name:find("Chest") and Object.ClassName == "Part" then
+                            table.insert(UncheckedChests, Object)
+                        end
+                    end
+                end
+
+                local Chests = {}
+                for _, Chest in pairs(UncheckedChests) do
+                    if Chest:FindFirstChild("TouchInterest") then
+                        table.insert(Chests, Chest)
+                    end
+                end
+
+                local RootPart = getCharacter().LowerTorso
+                table.sort(Chests, function(a, b)
+                    return (RootPart.Position - a.Position).Magnitude < (RootPart.Position - b.Position).Magnitude
+                end)
+                return Chests
+            end
+
+            local function runChestLoop()
+                if IsFarming then return end
+                IsFarming = true
+
+                task.spawn(function()
+                    while _G.AutoChestBP and LocalPlayer.Character and LocalPlayer.Character.Parent do
+                        local Chests = getChestsSorted()
+                        if #Chests > 0 then
+                            local RootPart = getCharacter().HumanoidRootPart
+                            RootPart.CFrame = Chests[1].CFrame
+                        end
+                        task.wait(0.1)
+                    end
+                    IsFarming = false
+                end)
+            end
+
+            LocalPlayer.CharacterAdded:Connect(function()
+                getCharacter()
+                task.wait(0.5)
+                if _G.AutoChestBP then
+                    runChestLoop()
+                end
+            end)
+
+            runChestLoop()
+        end
+    end
+})
+
+Tabs.Main:AddSection("Collect Berry")
+
+Berry = Tabs.Main:AddToggle({
+Name = "Auto Farm Berry", 
+Description = "Tự động farm berry", 
+Default = false,
+Callback = function(Value)
+  _G.AutoBerry = Value
+end})
+spawn(function()
+  while wait(Sec) do
+    if _G.AutoBerry then
+      local CollectionService= game:GetService("CollectionService")
+      local Players= game:GetService("Players")
+      local Player = Players.LocalPlayer
+      local BerryBush = CollectionService:GetTagged("BerryBush")      
+      local Distance, Nearest = math.huge      
+      for i = 1, #BerryBush do
+        local Bush = BerryBush[i]        
+        for AttributeName, BerryName in pairs(Bush:GetAttributes()) do
+          if not BerryArray or table.find(BerryArray, BerryName) then           
+            _tp(Bush.Parent:GetPivot())
+            for i = 1, #BerryBush do
+            local Bush = BerryBush[i]        
+              for AttributeName, BerryName in pairs(Bush:GetChildren()) do
+                if not BerryArray or table.find(BerryArray, BerryName) then
+                  _tp(BerryName.WorldPivot)
+                  fireproximityprompt(BerryName.ProximityPrompt,math.huge)
+                end
+              end
+            end      
+          end
+        end
+      end      
+    end
+  end
+end)
+
+
+
+BerryH = Tabs.Main:AddToggle({
+Name = "Auto Farm Berry + Hop", 
+Description = "Tự động farm berry + hop", 
+Default = false,
+Callback = function(Value)
+  _G.AutoBerryH = Value
+end})
+
+spawn(function()
+    while wait(Sec) do
+        if _G.AutoBerryH then
+            local CollectionService = game:GetService("CollectionService")
+            local Players = game:GetService("Players")
+            local Player = Players.LocalPlayer
+            local BerryBush = CollectionService:GetTagged("BerryBush")
+
+            if #BerryBush == 0 then
+                local TeleportService = game:GetService("TeleportService")
+                local ServerList = {}
+                
+                local Success, Error = pcall(function()
+                    ServerList = game:GetService("HttpService"):JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"))
+                end)
+                
+                if Success and ServerList.data then
+                    for _, Server in pairs(ServerList.data) do
+                        if Server.playing < Server.maxPlayers and Server.id ~= game.JobId then
+                            TeleportService:TeleportToPlaceInstance(game.PlaceId, Server.id, Player)
+                            break
+                        end
+                    end
+                end
+            else
+                for i = 1, #BerryBush do
+                    local Bush = BerryBush[i]
+                    
+                    for AttributeName, BerryName in pairs(Bush:GetAttributes()) do
+                        if not BerryArray or table.find(BerryArray, BerryName) then
+                            _tp(Bush.Parent:GetPivot())
+                            
+                            for j = 1, #BerryBush do
+                                local Bush2 = BerryBush[j]
+                                
+                                for _, BerryChild in pairs(Bush2:GetChildren()) do
+                                    if not BerryArray or table.find(BerryArray, BerryChild.Name) then
+                                        _tp(BerryChild.WorldPivot)
+                                        fireproximityprompt(BerryChild.ProximityPrompt, math.huge)
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
