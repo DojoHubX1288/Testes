@@ -2072,3 +2072,206 @@ spawn(function()
         end
     end
 end)
+
+Tabs.Main:AddSection("Elite Hunter")
+
+local Process = Tabs.Main:AddParagraph("Elites Process", "")
+spawn(function()
+    while wait(Sec) do
+        pcall(function()    
+            Process:SetDesc("Elite Progress : " .. replicated.Remotes.CommF_:InvokeServer("EliteHunter", "Progress"))
+        end)
+    end
+end)
+
+local EliteHunter = Tabs.Main:AddParagraph("Elite Spawn", "Status: ")
+spawn(function()
+    local previousStatus = ""
+    while wait(1) do
+        local currentStatus = (game:GetService("ReplicatedStorage"):FindFirstChild("Diablo") or 
+                               game:GetService("ReplicatedStorage"):FindFirstChild("Deandre") or 
+                               game:GetService("ReplicatedStorage"):FindFirstChild("Urban") or 
+                               game:GetService("Workspace").Enemies:FindFirstChild("Diablo") or 
+                               game:GetService("Workspace").Enemies:FindFirstChild("Deandre") or 
+                               game:GetService("Workspace").Enemies:FindFirstChild("Urban")) and '✅' or '❌'
+        local progress = game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("EliteHunter", "Progress")
+        if currentStatus ~= previousStatus then
+            EliteHunter:SetDesc("Status: " .. currentStatus .. " | Killed: " .. progress)
+            previousStatus = currentStatus
+        end
+    end
+end)
+
+EliteQ = Tabs.Main:AddToggle({
+    Name = "Auto Farm Elite",
+    Description = "Tự động farm elite",
+    Default = false,
+    Callback = function(Value)
+    _G.FarmEliteHunt = Value
+end})
+
+spawn(function()
+    while wait(1) do
+        pcall(function()
+            if _G.FarmEliteHunt then
+                local questGui = plr.PlayerGui.Main.Quest
+                local questTitle = questGui.Container.QuestTitle.Title.Text
+
+                if not questGui.Visible then
+                    
+                    local result = replicated.Remotes.CommF_:InvokeServer("EliteHunter")
+                    if result == nil or string.find(result, "Cooldown") then
+                      
+                        wait(10)
+                        return
+                    end
+                    task.wait(1)
+                else
+                    
+                    local eliteName = nil
+                    for _, name in pairs({"Diablo", "Urban", "Deandre"}) do
+                        if string.find(questTitle, name) then
+                            eliteName = name
+                            break
+                        end
+                    end
+
+                    if eliteName then
+                        local boss = nil
+                        
+                        for _, v in pairs(replicated:GetChildren()) do
+                            if v.Name == eliteName and v:FindFirstChild("HumanoidRootPart") then
+                                boss = v
+                                break
+                            end
+                        end
+                        for _, v in pairs(Enemies:GetChildren()) do
+                            if v.Name == eliteName and Attack.Alive(v) then
+                                boss = v
+                                break
+                            end
+                        end
+
+                        if boss and boss:FindFirstChild("HumanoidRootPart") then
+                            _tp(boss.HumanoidRootPart.CFrame * CFrame.new(0, 30, 0))
+                            repeat
+                                wait()
+                                Attack.Kill(boss, _G.FarmEliteHunt)
+                            until not _G.FarmEliteHunt or not boss.Parent or boss.Humanoid.Health <= 0 or not questGui.Visible
+                        else
+                           
+                            wait(5)
+                        end
+                    else
+                       
+                        replicated.Remotes.CommF_:InvokeServer("AbandonQuest")
+                    end
+                end
+            end
+        end)
+    end
+end)
+
+EliteH = Tabs.Main:AddToggle({
+	Name = "Auto Farm Elite + Hop",
+	Description = "Tự động farm elite + hop",
+	Default = false,
+	Callback = function(Value)
+	_G.FarmEliteH = Value
+end})
+
+
+local function HopServer()
+	local Http = game:GetService("HttpService")
+	local TPS = game:GetService("TeleportService")
+	local Api = "https://games.roblox.com/v1/games/"
+	local PlaceID = game.PlaceId
+	local Servers = {}
+	local Cursor = ""
+	local foundServer = false
+
+	repeat
+		local success, result = pcall(function()
+			return game:HttpGet(Api .. PlaceID .. "/servers/Public?sortOrder=Asc&limit=100&cursor=" .. Cursor)
+		end)
+		if success and result then
+			local data = Http:JSONDecode(result)
+			if data.data then
+				for _, v in pairs(data.data) do
+					if v.playing < v.maxPlayers and v.id ~= game.JobId then
+						foundServer = true
+						TPS:TeleportToPlaceInstance(PlaceID, v.id)
+						break
+					end
+				end
+				Cursor = data.nextPageCursor or ""
+			end
+		end
+	until not Cursor or foundServer
+end
+
+
+spawn(function()
+	while task.wait(1) do
+		pcall(function()
+			if _G.FarmEliteH then
+				local questGui = plr.PlayerGui.Main.Quest
+				local questTitle = questGui.Container.QuestTitle.Title.Text
+
+				
+				if not questGui.Visible then
+					local result = replicated.Remotes.CommF_:InvokeServer("EliteHunter")
+					if result == nil or string.find(result, "Cooldown") then
+					
+						HopServer()
+						return
+					end
+					task.wait(1)
+
+				else
+				
+					local eliteName = nil
+					for _, name in pairs({"Diablo", "Urban", "Deandre"}) do
+						if string.find(questTitle, name) then
+							eliteName = name
+							break
+						end
+					end
+
+					if eliteName then
+						local boss = nil
+						for _, v in pairs(replicated:GetChildren()) do
+							if v.Name == eliteName and v:FindFirstChild("HumanoidRootPart") then
+								boss = v
+								break
+							end
+						end
+						for _, v in pairs(workspace.Enemies:GetChildren()) do
+							if v.Name == eliteName and Attack.Alive(v) then
+								boss = v
+								break
+							end
+						end
+
+						if boss and boss:FindFirstChild("HumanoidRootPart") then
+							_tp(boss.HumanoidRootPart.CFrame * CFrame.new(0, 30, 0))
+							repeat
+								wait()
+								Attack.Kill(boss, _G.FarmEliteH)
+							until not _G.FarmEliteH or not boss.Parent or boss.Humanoid.Health <= 0 or not questGui.Visible
+						else
+						
+							task.wait(5)
+							HopServer()
+						end
+					else
+					
+						replicated.Remotes.CommF_:InvokeServer("AbandonQuest")
+						task.wait(1)
+						HopServer()
+					end
+				end
+			end
+		end)
+	end
+end)
