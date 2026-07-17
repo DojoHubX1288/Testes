@@ -1838,3 +1838,27 @@ spawn(function()
     end
   end
 end)
+
+Tabs.Main:AddSection("Ectoplasm")
+Ecto = Tabs.Main:AddToggle({
+Name = "Auto Farm Ectoplasm", 
+Description = "Tự động farm nguyên liệu", 
+Default = false,
+Callback = function(Value)
+  _G.AutoEctoplasm = Value
+end})
+spawn(function()
+  while wait(Sec) do
+    pcall(function()
+      if _G.AutoEctoplasm then
+        local EctoTable = {"Ship Deckhand","Ship Engineer","Ship Steward","Ship Officer","Arctic Warrior"}    
+        local v = GetConnectionEnemies(EctoTable)
+		if Attack.Alive(v) then
+		  repeat wait() Attack.Kill(v, _G.AutoEctoplasm)until not _G.AutoEctoplasm or not v.Parent or v.Humanoid.Health <= 0		        
+	    else
+	      replicated.Remotes.CommF_:InvokeServer("requestEntrance",Vector3.new(923.21252441406, 126.9760055542, 32852.83203125))
+	    end
+      end
+    end)
+  end
+end)
