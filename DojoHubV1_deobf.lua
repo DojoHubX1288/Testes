@@ -2275,3 +2275,338 @@ spawn(function()
 		end)
 	end
 end)
+
+Tabs.Main:AddSection("Rip Indra")
+
+Tabs.Main:AddToggle({
+Name = "Auto Attack Rip Indra", 
+Description = "Tiêu diệt Rip_Indra", 
+Default = false,
+Callback = function(Value)
+  _G.AutoRipIngay = Value
+end})
+spawn(function()
+  while wait(Sec) do
+    pcall(function()
+      if _G.AutoRipIngay then
+        local v = GetConnectionEnemies("rip_indra")
+	    if not GetWP("Dark Dagger") or not GetIn("Valkyrie") and v then
+	      repeat wait() Attack.Kill(v,_G.AutoRipIngay)until not _G.AutoRipIngay or not v.Parent or v.Humanoid.Health <= 0
+        else
+          replicated.Remotes.CommF_:InvokeServer("requestEntrance",Vector3.new(-5097.93164, 316.447021, -3142.66602, -0.405007899, -4.31682743e-08, 0.914313197, -1.90943332e-08, 1, 3.8755779e-08, -0.914313197, -1.76180437e-09, -0.405007899))
+		  wait(.1)_tp(CFrame.new(-5344.822265625, 423.98541259766, -2725.0930175781))
+	    end
+      end
+    end)
+  end
+end)
+
+Tabs.Main:AddToggle({
+Name = "Auto Unlocked Haki", 
+Description = "Mở Khóa Haki", 
+Default = false,
+Callback = function(Value)
+  _G.AutoUnHaki = Value
+end})
+AuraSkin = function(HakiID)
+  local args = {[1] = {["StorageName"] = HakiID,["Type"] = "AuraSkin",["Context"] = "Equip"}};
+  replicated:WaitForChild("Modules"):WaitForChild("Net"):WaitForChild("RF/FruitCustomizerRF"):InvokeServer(unpack(args));
+end;
+VaildColor = function(Part)
+  if Part and Part.BrickColor then return (tostring(Part.BrickColor) == "Lime green") end;
+end;
+HakiCalculate = function(Part)
+  local ID = {["Really red"] = "Pure Red";["Oyster"] = "Snow White";["Hot pink"] = "Winter Sky";};
+  if Part and Part.BrickColor then return (ID[tostring(Part.BrickColor)])end;
+end;
+spawn(function()
+  while wait(Sec) do
+    if _G.AutoUnHaki then
+      pcall(function()
+        local Summoner = workspace.Map["Boat Castle"]:FindFirstChild("Summoner");
+        if Summoner and Summoner:FindFirstChild("Circle") then 
+          for i,v in pairs(Summoner:FindFirstChild("Circle"):GetChildren()) do 
+            if v.Name == "Part" then 
+            local TogglesPart = v:FindFirstChild("Part");
+              if VaildColor(TogglesPart) == false then 
+                AuraSkin(HakiCalculate(v));
+                repeat wait() _tp(v.CFrame) until VaildColor(TogglesPart) == true or not _G.AutoUnHaki;
+              end
+            end            
+          end
+        end        
+      end)
+    end
+  end
+end)
+
+Tabs.Main:AddSection("Farming Cake")
+local MobKilled = Tabs.Main:AddParagraph("Cake Princes", "")
+spawn(function()
+    while wait(0.2) do
+        pcall(function()
+            local Killed = string.match(replicated.Remotes.CommF_:InvokeServer("CakePrinceSpawner"), "%d+")
+            if Killed then
+                MobKilled:SetDesc("Killed : " .. (500 - tonumber(Killed) or 0))
+            end
+        end)
+    end
+end)
+
+Cake = Tabs.Main:AddToggle({
+    Name = "Auto Farm Cake Prince",
+    Description = "Farm Hoàng Tử Bánh Ngọt",
+    Default = false,
+    Callback = function(Value)
+    _G.Auto_Cake_Prince = Value
+end
+})
+
+spawn(function()
+    while task.wait() do
+        if _G.Auto_Cake_Prince and not _G.AutoRaidCastle then
+            pcall(function()
+                local player = game.Players.LocalPlayer
+                local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+                local questUI = player.PlayerGui.Main.Quest
+                local enemies = workspace.Enemies
+                local cakeMap = workspace.Map:FindFirstChild("CakeLoaf")
+                local bigMirror = cakeMap and cakeMap:FindFirstChild("BigMirror")
+                if not root then return end
+
+                if _G.AcceptQuestC and questUI and not questUI.Visible then
+                    local questPos = CFrame.new(-1927.92, 37.8, -12842.54)
+                    _tp(questPos)
+                    while (questPos.Position - root.Position).Magnitude > 50 do
+                        task.wait(0.2)
+                    end
+                    local randomQuest = math.random(1, 4)
+                    local questData = {
+                        [1] = {"StartQuest", "CakeQuest2", 2},
+                        [2] = {"StartQuest", "CakeQuest2", 1},
+                        [3] = {"StartQuest", "CakeQuest1", 1},
+                        [4] = {"StartQuest", "CakeQuest1", 2}
+                    }
+                    pcall(function()
+                        game.ReplicatedStorage.Remotes.CommF_:InvokeServer(unpack(questData[randomQuest]))
+                    end)
+                end
+
+                if not cakeMap then
+                    _tp(CFrame.new(-2077, 252, -12373))
+                    task.wait(2)
+                    return
+                end
+
+                if bigMirror and (bigMirror.Other.Transparency == 0 or enemies:FindFirstChild("Cake Prince")) then
+                    local boss = GetConnectionEnemies("Cake Prince")
+                    if boss then
+                        repeat task.wait()
+                            Attack.Kill2(boss, _G.Auto_Cake_Prince)
+                        until not _G.Auto_Cake_Prince or not boss.Parent or boss.Humanoid.Health <= 0
+                    else
+                        _tp(CFrame.new(-2151.82, 149.32, -12404.91))
+                    end
+                else
+
+                    local CakeMobs = {"Cookie Crafter","Cake Guard","Baking Staff","Head Baker"}
+                    local mob = GetConnectionEnemies(CakeMobs)
+                    if mob then
+                        repeat task.wait()
+                            Attack.Kill(mob, _G.Auto_Cake_Prince)
+                        until not _G.Auto_Cake_Prince or not mob.Parent or mob.Humanoid.Health <= 0 or (bigMirror and bigMirror.Other.Transparency == 0)
+                    else
+                        _tp(CFrame.new(-2077, 252, -12373))
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+CakeQ = Tabs.Main:AddToggle({
+Name = "Accept Quests", 
+Description = "Chấp nhận nhiệm vụ", 
+Default = false,
+Callback = function(Value)
+  _G.AcceptQuestC = Value
+end
+})
+
+
+CakeSM = Tabs.Main:AddToggle({
+    Name = "Auto Summon Cake Prince",
+    Description = "Triệu Hồi Hoàng Tử Bột",
+    Default = false,
+    Callback = function(Value)
+    _G.AutoSpawnCP = Value
+end})
+
+spawn(function()
+    while task.wait(2) do
+        if _G.AutoSpawnCP then
+            pcall(function()
+                local CommF = game.ReplicatedStorage.Remotes.CommF_
+                local enemies = workspace.Enemies
+                local bigMirror = workspace.Map.CakeLoaf:FindFirstChild("BigMirror")
+                if not bigMirror then return end
+                if enemies:FindFirstChild("Cake Prince") then return end
+                if bigMirror.Other.Transparency == 0 then return end
+
+                CommF:InvokeServer("CakePrinceSpawner", true)
+            end)
+        end
+    end
+end)
+
+
+Tabs.Main:AddToggle({
+    Name = "Auto Dough King [Fully]",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoDoughKing = Value
+    end
+})
+
+spawn(function()
+    while wait() do
+        if _G.AutoDoughKing then
+            pcall(function()
+                if not workspace.Map.CakeLoaf:FindFirstChild("RedDoor") then
+                    if GetBP("Red Key") then
+                        replicated.Remotes.CommF_:InvokeServer("CakeScientist", "Check")
+                        replicated.Remotes.CommF_:InvokeServer("RaidsNpc", "Check")
+                    end
+                elseif workspace.Map.CakeLoaf:FindFirstChild("RedDoor") then
+                    if GetBP("Red Key") then
+                        repeat
+                            task.wait()
+                            _tp(CFrame.new(-2681.97998, 64.3921585, -12853.7363,0.149007782, -1.87902192e-08, 0.98883605,3.60619588e-08, 1, 1.35681812e-08,-0.98883605, 3.36376011e-08, 0.149007782))
+                        until not getgenv().AutoDoughKing or (plr.Character.HumanoidRootPart.CFrame - CFrame.new(-2681.97998, 64.3921585, -12853.7363,0.149007782, -1.87902192e-08, 0.98883605,3.60619588e-08, 1, 1.35681812e-08,-0.98883605, 3.36376011e-08, 0.149007782)).Magnitude <= 5
+                        EquipWeapon("Red Key")
+                    end
+                elseif GetConnectionEnemies("Dough King") then
+                    local v = GetConnectionEnemies("Dough King")
+                    if v then
+                        repeat
+                            task.wait()
+                            Attack.Kill(v, _G.AutoDoughKing)
+                        until not _G.AutoDoughKing or not v.Parent or v.Humanoid.Health <= 0
+                    else
+                        _tp(CFrame.new(-1943.676513671875, 251.5095672607422, -12337.880859375))
+                    end
+                end
+                if GetBP("Sweet Chalice") then
+                    replicated.Remotes.CommF_:InvokeServer("CakePrinceSpawner", true)
+                    _G.AutoAttackDoughKing = true
+                else
+                    _G.AutoAttackDoughKing = false
+                end
+                if GetBP("God's Chalice") and GetM("Conjured Cocoa") >= 10 then
+                    replicated.Remotes.CommF_:InvokeServer("SweetChaliceNpc")
+                end
+                if not plr.Backpack:FindFirstChild("God's Chalice")
+                    or plr.Character:FindFirstChild("God's Chalice")
+                then
+                    _G.FarmEliteHunt = true
+                else
+                    _G.FarmEliteHunt = false
+                end
+                if GetM("Conjured Cocoa") <= 10 then
+                    local v = GetConnectionEnemies{"Cocoa Warrior", "Chocolate Bar Battler"}
+                    if v then
+                        repeat
+                            task.wait()
+                            Attack.Kill(v, _G.AutoDoughKing)
+                        until _G.AutoDoughKing == false or not v.Parent or v.Humanoid.Health <= 0
+                    else
+                        _tp(CFrame.new(402.7189025878906, 81.06050109863281, -12259.54296875))
+                    end
+                end
+            end)
+        end
+    end
+end)
+Tabs.Main:AddToggle({
+    Name = "Auto Farm Dough King",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoAttackDoughKing = Value
+    end
+})
+spawn(function()
+    while wait() do
+        if _G.AutoAttackDoughKing then
+            pcall(function()
+                local v = GetConnectionEnemies("Dough King")
+                if v then
+                    repeat 
+                        task.wait()
+                        Attack.Kill(v,_G.AutoAttackDoughKing)
+                    until not _G.AutoAttackDoughKing or not v.Parent or v.Humanoid.Health <= 0
+                else
+                    _tp(CFrame.new(-1943.6765, 251.5095, -12337.8809))
+                end
+            end)
+        end
+    end
+end)
+
+Tabs.Main:AddToggle({
+    Name = "Auto Farm Dough King + Hop",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoHop_Dough = Value
+    end
+})
+
+
+local function HopServer()
+    pcall(function()
+        local Http = game:GetService("HttpService")
+        local Servers = {}
+        local req = game:HttpGet("https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100")
+        local data = Http:JSONDecode(req)
+
+        for i,v in pairs(data.data) do
+            if v.playing < v.maxPlayers then
+                table.insert(Servers, v.id)
+            end
+        end
+        if #Servers > 0 then
+            game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, Servers[math.random(1,#Servers)], game.Players.LocalPlayer)
+        end
+    end)
+end
+
+
+spawn(function()
+    while task.wait() do
+        if _G.AutoHop_Dough then
+            pcall(function()
+                local v = GetConnectionEnemies("Dough King")
+
+                if v then
+                 
+                    repeat 
+                        task.wait()
+                        Attack.Kill(v, _G.AutoHop_Dough)
+                    until not _G.AutoHop_Dough or not v.Parent or v.Humanoid.Health <= 0
+
+                else
+                  
+                    _tp(CFrame.new(-1943.6765, 251.5095, -12337.8809))
+
+                    task.wait(2)
+
+                    
+                    local checkAgain = GetConnectionEnemies("Dough King")
+
+                    if not checkAgain and _G.AutoHop_Dough then
+                        HopServer()
+                    end
+                end
+            end)
+        end
+    end
+end)
