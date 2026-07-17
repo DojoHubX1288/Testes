@@ -2610,3 +2610,564 @@ spawn(function()
         end
     end
 end)
+
+Tabs.Main:AddSection("Bones")
+
+local CheckingBone = Tabs.Main:AddParagraph("Bones", "")
+spawn(function()
+    while wait(0.2) do
+        pcall(function()
+            CheckingBone:SetDesc("Bones : " .. GetM("Bones"))
+        end)
+    end
+end)
+
+Tabs.Main:AddToggle({
+    Name = "Auto Farm Bones",
+    Description = "Tự động farm xương",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoFarm_Bone = Value
+    end
+})
+
+spawn(function()
+    local player = game.Players.LocalPlayer
+    local BonesTable = {
+        "Reborn Skeleton",
+        "Living Zombie",
+        "Demonic Soul",
+        "Possessed Mummy"
+    }
+
+    while wait(0.5) do
+        if not _G.AutoFarm_Bone then continue end
+
+        pcall(function()
+            local char = player.Character
+            local root = char and char:FindFirstChild("HumanoidRootPart")
+            if not root then return end
+
+           
+            local questUI =
+                player.PlayerGui:FindFirstChild("Main")
+                and player.PlayerGui.Main:FindFirstChild("Quest")
+
+            local bone = GetConnectionEnemies(BonesTable)
+
+            
+            if _G.AcceptQuestB and questUI and not questUI.Visible then
+                local questPos = CFrame.new(-9516.99316,172.01718,6078.46533)
+                _tp(questPos)
+
+                repeat wait(2)
+                until not _G.AutoFarm_Bone
+                   or (questPos.Position - root.Position).Magnitude <= 50
+
+                if not _G.AutoFarm_Bone then return end
+
+                local questData = {
+                    {"StartQuest","HauntedQuest2",2},
+                    {"StartQuest","HauntedQuest2",1},
+                    {"StartQuest","HauntedQuest1",1},
+                    {"StartQuest","HauntedQuest1",2}
+                }
+
+                game.ReplicatedStorage.Remotes.CommF_:InvokeServer(
+                    unpack(questData[math.random(1,#questData)])
+                )
+            end
+
+           
+            if bone then
+                repeat
+                    wait()
+                    Attack.Kill(bone, true)
+                until not _G.AutoFarm_Bone
+                   or not bone.Parent
+                   or bone.Humanoid.Health <= 0
+            else
+            
+                _tp(CFrame.new(-9495.6806640625, 453.58624267578125, 5977.3486328125))
+            end
+        end)
+    end
+end)
+
+BoneQ = Tabs.Main:AddToggle({
+Name = "Accept Quests", 
+Description = "Chấp nhận nhiệm vụ", 
+Default = false,
+Callback = function(Value)
+  _G.AcceptQuestB = Value
+end
+})        
+
+
+
+Tabs.Main:AddToggle({
+Name = "Auto Soul Reaper", 
+Description = "Tự động tiêu diệt boss", 
+Default = false,
+Callback = function(Value)
+  _G.AutoHytHallow = Value
+end})
+spawn(function()
+  while wait(Sec) do
+    if _G.AutoHytHallow then
+      pcall(function()
+        local v = GetConnectionEnemies("Soul Reaper")
+	    if v then
+          repeat task.wait() Attack.Kill(v,_G.AutoHytHallow) until v.Humanoid.Health <= 0 or _G.AutoHytHallow == false
+        else
+          if not GetBP("Hallow Essence") then
+            repeat task.wait(.1)replicated.Remotes.CommF_:InvokeServer("Bones","Buy",1,1)until _G.AutoHytHallow == false or GetBP("Hallow Essence")
+          else
+            repeat wait(.1) _tp(CFrame.new(-8932.322265625, 146.83154296875, 6062.55078125))until _G.AutoHytHallow == false or (plr.Character.HumanoidRootPart.CFrame == CFrame.new(-8932.322265625, 146.83154296875, 6062.55078125))
+		    EquipWeapon("Hallow Essence")
+          end
+        end
+      end)
+    end
+  end
+end)
+RanBone = Tabs.Main:AddToggle({
+Name = "Auto Random Bones", 
+Description = "Tự động quay xương", 
+Default = false,
+Callback = function(Value)
+  _G.Auto_Random_Bone = Value
+end})
+spawn(function()
+  while wait(Sec) do
+    pcall(function()
+      if _G.Auto_Random_Bone then    
+  	    repeat task.wait() replicated.Remotes.CommF_:InvokeServer("Bones","Buy",1,1) until not _G.Auto_Random_Bone
+      end
+    end)
+  end
+end)
+Lucky = Tabs.Main:AddToggle({
+Name = "Auto Try Luck Gravestone", 
+Description = "", 
+Default = false,
+Callback = function(Value)
+  _G.TryLucky = Value
+end})
+spawn(function()
+  while wait(Sec) do
+    if _G.TryLucky then
+    local try_bones_luck = CFrame.new(-8761.3154296875, 164.85829162598, 6161.1567382813)
+      if (plr.Character.HumanoidRootPart.CFrame ~= try_bones_luck) then
+        _tp(CFrame.new(-8761.3154296875, 164.85829162598, 6161.1567382813))
+	 elseif (plr.Character.HumanoidRootPart.CFrame == try_bones_luck) then
+	   replicated.Remotes.CommF_:InvokeServer("gravestoneEvent",1)
+      end
+    end
+  end
+end)
+Pray = Tabs.Main:AddToggle({
+Name = "Auto Pray Gravestone", 
+Description = "", 
+Default = false,
+Callback = function(Value)
+  _G.Praying = Value
+end})
+spawn(function()
+  while wait(Sec) do
+    if _G.Praying then
+    local try_bones_luck = CFrame.new(-8761.3154296875, 164.85829162598, 6161.1567382813)
+      if (plr.Character.HumanoidRootPart.CFrame ~= try_bones_luck) then
+	   _tp(CFrame.new(-8761.3154296875, 164.85829162598, 6161.1567382813))
+      elseif (plr.Character.HumanoidRootPart.CFrame == try_bones_luck) then
+	   replicated.Remotes.CommF_:InvokeServer("gravestoneEvent",2)
+      end
+    end
+  end
+end)
+
+Tabs.Main:AddSection("Tyrant of the Skies")
+
+local TyrantStatus = Tabs.Main:AddParagraph("Boss Spawn", "")
+spawn(function()
+    pcall(function()
+        while wait(1) do
+            if workspace.Enemies:FindFirstChild("Tyrant of the Skies") then
+                TyrantStatus:SetDesc("✅")
+            else
+                TyrantStatus:SetDesc("❌")
+            end
+        end
+    end)
+end)
+local EyeStatus = Tabs.Main:AddParagraph("Check Status Eyes", "")
+
+function Check_Eye()
+    local e = workspace.Map.TikiOutpost.IslandModel
+    local eyes = {
+        e.Eye1,
+        e.Eye2,
+        e.IslandChunks.E.Eye3,
+        e.IslandChunks.E.Eye4
+    }
+
+    local count = 0
+    for _, eye in ipairs(eyes) do
+        if eye and eye.Transparency ~= 1 then
+            count = count + 1
+        end
+    end
+
+    local isFull = (count == 4)
+    return count, isFull
+end
+
+task.spawn(function()
+    local alerted = false
+    while task.wait(1) do
+        local current, full = Check_Eye()
+        EyeStatus:SetDesc("Eyes: " .. current .. "/4")
+
+        if full and not alerted then
+            alerted = true
+        elseif not full then
+            alerted = false
+        end
+    end
+end)
+
+FarmTyrant = Tabs.Main:AddToggle({
+Name = "Auto Farm Boss TOTS", 
+Description = "Tự động tiêu diệt boss chim", 
+Default = false,
+Callback = function(Value) 
+    _G.FarmTyrant = Value 
+end})
+
+spawn(function()
+    while wait(Sec) do
+        if _G.FarmTyrant then
+            pcall(function()
+                if not plr.Character then return end
+                local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
+                if not hrp then return end
+
+                local bossPos = Vector3.new(-16268.287, 152.616, 1390.773)
+                
+                if (hrp.Position - bossPos).Magnitude > 5 then
+                    _tp(CFrame.new(bossPos))
+                    repeat wait() until not _G.FarmTyrant or (plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and (plr.Character.HumanoidRootPart.Position - bossPos).Magnitude <= 5)
+                end
+
+                local boss = workspace.Enemies:FindFirstChild("Tyrant of the Skies")
+                if boss and boss:FindFirstChild("Humanoid") and boss.Humanoid.Health > 0 then
+                    repeat
+                        if not _G.FarmTyrant then break end
+                        if Attack and Attack.Kill then
+                            Attack.Kill(boss, _G.FarmTyrant)
+                        end
+                        wait()
+                    until not _G.FarmTyrant or not boss.Parent or boss.Humanoid.Health <= 0
+                    return
+                end
+
+                local mobList = {"Serpent Hunter","Skull Slayer","Isle Champion","Sun-kissed Warrior"}
+                for _, mobName in ipairs(mobList) do
+                    if not _G.FarmTyrant then break end
+                    for _, mob in pairs(workspace.Enemies:GetChildren()) do
+                        if not _G.FarmTyrant then break end
+                        if mob and mob.Name == mobName and mob:FindFirstChild("HumanoidRootPart") and mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then
+                            if (hrp.Position - mob.HumanoidRootPart.Position).Magnitude > 5000 then
+                                _tp(mob.HumanoidRootPart.CFrame * CFrame.new(0,30,0))
+                                local t0 = tick()
+                                repeat wait() hrp = plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") until not _G.FarmTyrant or not hrp or (hrp.Position - mob.HumanoidRootPart.Position).Magnitude <= 6 or tick() - t0 > 8
+                            end
+                            repeat
+                                if not _G.FarmTyrant then break end
+                                if Attack and Attack.Kill then
+                                    Attack.Kill(mob, _G.FarmTyrant)
+                                end
+                                wait()
+                            until not _G.FarmTyrant or not mob.Parent or mob.Humanoid.Health <= 0
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+FarmPhaBinh = Tabs.Main:AddToggle({
+Name = "Auto Summon Boss", 
+Description = "Triệu hồi boss chim", 
+Default = false,
+Callback = function(Value)
+    _G.FarmPhaBinh = Value
+end})
+
+local function sendSkillKey(skillKey)
+    local virtualInputManager = game:GetService("VirtualInputManager")
+    virtualInputManager:SendKeyEvent(true, skillKey, false, game)
+    wait(0.05)
+    virtualInputManager:SendKeyEvent(false, skillKey, false, game)
+end
+
+local function equipAndUseSkill(toolType)
+    local character = plr.Character
+    local backpack = plr.Backpack
+    if not (character and character:FindFirstChild("Humanoid") and character.Humanoid.Health > 0) then return end
+
+    for _, item in pairs(backpack:GetChildren()) do
+        if item:IsA("Tool") and item.ToolTip == toolType then
+            item.Parent = character
+            wait(0.12)
+            for _, skill in ipairs({"Z", "X", "C", "V", "F"}) do
+                if not _G.FarmPhaBinh then break end
+                pcall(function() sendSkillKey(skill) end)
+                wait(0.12)
+            end
+            item.Parent = backpack
+            break
+        end
+    end
+end
+
+local PhaBinhPoints = {
+    CFrame.new(-16332.5263671875, 158.07200622558594, 1440.324951171875),
+    CFrame.new(-16288.609375, 158.16700744628906, 1470.3680419921875),
+    CFrame.new(-16245.412109375, 158.43699645996094, 1463.365966796875),
+    CFrame.new(-16212.46875, 158.16700744628906, 1466.343994140625),
+    CFrame.new(-16211.9462890625, 158.07200622558594, 1322.39794921875),
+    CFrame.new(-16260.921875, 154.92100524902344, 1323.615966796875),
+    CFrame.new(-16297.0595703125, 159.322998046875, 1317.2239990234375),
+    CFrame.new(-16335.0966796875, 159.33399963378906, 1324.885986328125),
+}
+
+spawn(function()
+    while wait(Sec) do
+        if _G.FarmPhaBinh then
+            pcall(function()
+                if not (plr and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and plr.Character:FindFirstChild("Humanoid") and plr.Character.Humanoid.Health > 0) then return end
+
+                for _, point in ipairs(PhaBinhPoints) do
+                    if not _G.FarmPhaBinh then break end
+
+                    _tp(point)
+
+                    local arrived = false
+                    local start = tick()
+                    while tick() - start < 12 and not arrived and _G.FarmPhaBinh do
+                        local hrp = plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
+                        if not hrp then break end
+                        local dist = (hrp.Position - point.Position).Magnitude
+                        if dist <= 3 then
+                            arrived = true
+                            break
+                        end
+                        wait(0.1)
+                    end
+
+                    if _G.FarmPhaBinh and arrived then
+                        equipAndUseSkill("Melee")
+                        equipAndUseSkill("Sword")
+                        equipAndUseSkill("Gun")
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+
+Tabs.Main:AddSection("Farm Material")
+
+Test = Tabs.Main:AddDropdown({
+Name = "Choose Material",
+		Description = "Chọn nguyên liệu",
+		Options = MaterialList,
+		Callback = function(Value)
+			getgenv().SelectMaterial = Value
+		end
+		})
+Toggle = Tabs.Main:AddToggle({
+Name = "Auto Farm Materials", 
+Description = "Tự động cày nguyên liệu", 
+Default = false,
+Callback = function(Value)
+    getgenv().AutoMaterial = Value
+end})
+spawn(function()
+  local function processEnemy(v, EnemyName)
+    if v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v.Humanoid.Health > 0 then
+      if v.Name == EnemyName then repeat wait() Attack.Kill(v,getgenv().AutoMaterial) until not getgenv().AutoMaterial or not v.Parent or v.Humanoid.Health <= 0 end
+    end
+  end
+  local function handleEnemySpawns()
+    for _, v in pairs(game:GetService("Workspace")["_WorldOrigin"].EnemySpawns:GetChildren()) do
+      for _, EnemyName in ipairs(MMon) do
+        if string.find(v.Name, EnemyName) then
+          if (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - v.Position).Magnitude >= 10 then
+            _tp(v.CFrame * Pos)
+          end
+        end
+      end
+    end
+  end
+  while wait() do
+    if getgenv().AutoMaterial then
+      pcall(function()
+        if getgenv().SelectMaterial then MaterialMon(getgenv().SelectMaterial) _tp(MPos) end
+        for _, EnemyName in ipairs(MMon) do
+          for _, v in pairs(workspace.Enemies:GetChildren()) do processEnemy(v, EnemyName) end
+        end
+        handleEnemySpawns()
+      end)
+    end
+  end
+end)
+
+
+Tabs.Main:AddSection("Farm Boss")
+
+		BossDropdown = Tabs.Main:AddDropdown({
+		Name = "Select Boss",
+		Description = "Chọn boss",
+		Options = BossList,
+		Callback = function(value)
+			_G.FindBoss = value
+		end
+		})
+
+FarmBoss = Tabs.Main:AddToggle({
+    Name = "Auto Farm Boss",
+    Description = "Tự động tiêu diệt boss",
+    Default = false,
+    Callback = function(value)
+        _G.FarmBoss = value
+        spawn(function()
+            while wait(Sec) do
+                if _G.FarmBoss then
+                    pcall(function()
+                        local HasQuest = QuestBeta()[2] ~= nil and QuestBeta()[3] ~= nil
+                        local QuestTitle = plr.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text
+
+                       
+                        if _G.AcceptQuestBoss and HasQuest then
+                            if not string.find(QuestTitle, QuestBeta()[0]) then
+                                replicated.Remotes.CommF_:InvokeServer("AbandonQuest")
+                            end
+
+                            if plr.PlayerGui.Main.Quest.Visible == false then
+                                _tp(QuestBeta()[5])
+                                if (Root.Position - QuestBeta()[5].Position).Magnitude <= 5 then
+                                    replicated.Remotes.CommF_:InvokeServer("StartQuest", QuestBeta()[3], QuestBeta()[2])
+                                end
+                            elseif plr.PlayerGui.Main.Quest.Visible == true then
+                                if workspace.Enemies:FindFirstChild(QuestBeta()[1]) then
+                                    for i, v in pairs(workspace.Enemies:GetChildren()) do
+                                        if Attack.Alive(v) and v.Name == QuestBeta()[1] then
+                                            if string.find(QuestTitle, QuestBeta()[0]) then
+                                                repeat
+                                                    wait()
+                                                    Attack.Kill(v, _G.FarmBoss)
+                                                until not _G.FarmBoss or v.Humanoid.Health <= 0 or not v.Parent or plr.PlayerGui.Main.Quest.Visible == false
+                                            else
+                                                replicated.Remotes.CommF_:InvokeServer("AbandonQuest")
+                                            end
+                                        end
+                                    end
+                                else
+                                    _tp(QuestBeta()[4])
+                                    if replicated:FindFirstChild(QuestBeta()[1]) then
+                                        _tp(replicated:FindFirstChild(QuestBeta()[1]).HumanoidRootPart.CFrame * CFrame.new(0, 30, 0))
+                                    end
+                                end
+                            end
+                        else
+                           
+                            if workspace.Enemies:FindFirstChild(QuestBeta()[1]) then
+                                for i, v in pairs(workspace.Enemies:GetChildren()) do
+                                    if Attack.Alive(v) and v.Name == QuestBeta()[1] then
+                                        repeat
+                                            wait()
+                                            Attack.Kill(v, _G.FarmBoss)
+                                        until not _G.FarmBoss or v.Humanoid.Health <= 0 or not v.Parent
+                                    end
+                                end
+                            else
+                                _tp(QuestBeta()[4])
+                                if replicated:FindFirstChild(QuestBeta()[1]) then
+                                    _tp(replicated:FindFirstChild(QuestBeta()[1]).HumanoidRootPart.CFrame * CFrame.new(0, 30, 0))
+                                end
+                            end
+                        end
+                    end)
+                end
+            end
+        end)
+    end
+})
+
+
+BossQ = Tabs.Main:AddToggle({
+    Name = "Accept Quests",
+    Description = "Nhận nhiệm vụ",
+    Default = true,
+    Callback = function(Value)
+        _G.AcceptQuestBoss = Value
+    end
+})
+
+FarmAllBoss = Tabs.Main:AddToggle({
+   Name = "Auto Farm All Boss",
+    Default = false,
+Callback = function(Value)
+    _G.AutoFarmAllBoss = Value
+end})
+
+task.spawn(function()
+    while task.wait(0.3) do
+        if _G.AutoFarmAllBoss then
+            pcall(function()
+                local player = game.Players.LocalPlayer
+                if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
+                local hrp = player.Character.HumanoidRootPart
+
+                local nearestBoss, nearestDist = nil, math.huge
+
+                for _, boss in pairs(workspace.Enemies:GetChildren()) do
+                    if boss:FindFirstChild("HumanoidRootPart") and boss:FindFirstChild("Humanoid") and boss.Humanoid.Health > 0 then
+                        if table.find(BossList, boss.Name) then
+                            local dist = (hrp.Position - boss.HumanoidRootPart.Position).Magnitude
+                            if dist < nearestDist then
+                                nearestBoss = boss
+                                nearestDist = dist
+                            end
+                        end
+                    end
+                end
+
+                if nearestBoss and nearestBoss:FindFirstChild("HumanoidRootPart") then
+                    local bossHRP = nearestBoss.HumanoidRootPart
+                    local humanoid = nearestBoss.Humanoid
+
+                    repeat
+                        task.wait(0.1)
+                        if not _G.AutoFarmAllBoss then break end
+
+                        local targetCFrame = bossHRP.CFrame * CFrame.new(0, 5, 0)
+                        if (hrp.Position - targetCFrame.Position).Magnitude > 100 then
+                            player.Character:PivotTo(targetCFrame)
+                        else
+                            _tp(targetCFrame)
+                        end
+
+                        if Attack and typeof(Attack.Kill) == "function" then
+                            Attack.Kill(nearestBoss, true)
+                        end
+                    until not nearestBoss.Parent or humanoid.Health <= 0 or not _G.AutoFarmAllBoss
+                end
+            end)
+        end
+    end
+end)
