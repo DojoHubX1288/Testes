@@ -1313,7 +1313,7 @@ QuestNeta = function()
     }
 end
 
-local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/tlredz/Library/refs/heads/main/redz-V5-remake/main.luau"))()
+local redzlib = loadstring(game:HttpGet("https://pastefy.app/pYQ5sQ7B/raw"))()
 local Window = redzlib:MakeWindow({
     Title = "Dojo Hub V2 [ Test ] : Blox Fruits",
     SubTitle = "by @nguoitinhroblox",
